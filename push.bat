@@ -1,72 +1,67 @@
 @echo off
-chcp 936 > nul
+chcp 65001 > nul
 
 echo Copyright Notice
 echo © 2025 Yoyo-ace1110. All Rights Reserved.
 
-:: 讀取使用者輸入作為提交訊息
-set /p commit_msg="請輸入提交訊息 (Commit Message): "
+:: Get user input
+set /p commit_msg="Enter commit message: "
 
 echo.
 echo ===================================================
-echo 正在準備 Git 操作...
-echo 提交訊息: "%commit_msg%"
+echo Preparing Git operations...
+echo Message: "%commit_msg%"
 echo ===================================================
 echo.
 
-:: 執行 git add .
-echo [1/3] 執行 git add . (暫存所有變更)
+:: Step 1: Git Add
+echo [1/3] Adding changes...
 git add .
 if errorlevel 1 (
     echo.
-    echo ❌ 錯誤: git add 失敗。請檢查專案狀態。
-    goto :eof
+    echo ❌ Error: git add failed.
+    goto :end
 )
-echo.
 
-:: 執行 git commit -m
-echo [2/3] 執行 git commit
-:: 檢查提交訊息是否為空
+:: Step 2: Git Commit
+echo [2/3] Committing changes...
 if "%commit_msg%"=="" (
     echo.
-    echo ⚠️ 警告: 提交訊息為空，使用預設訊息 "Auto commit"
+    echo ⚠️ Warning: Message is empty. Using "Auto commit".
     set commit_msg=Auto commit
 )
 
-:: 執行提交
 git commit -m "%commit_msg%"
 
-:: Git commit 在沒有變更時會返回非零代碼，這不是真正的錯誤，需要特別處理
+:: Handle "nothing to commit" case
 if errorlevel 1 (
     git status | findstr /i "nothing to commit"
     if not errorlevel 1 (
         echo.
-        echo ✅ 成功: 沒有任何新的變更需要提交。跳過 Push。
-        goto :eof
+        echo ✅ Info: Nothing new to commit. Skipping push.
+        goto :end
     ) else (
         echo.
-        echo ❌ 錯誤: git commit 失敗。
-        goto :eof
+        echo ❌ Error: git commit failed.
+        goto :end
     )
 )
-echo.
 
-:: 執行 git push
-echo [3/3] 執行 git push (推送到遠端)
+:: Step 3: Git Push
+echo.
+echo [3/3] Pushing to remote...
 git push
 
 if errorlevel 1 (
     echo.
-    echo ❌ 推送失敗: 
-    echo ---------------------------------------------------
-    echo 請注意: 如果遠端有新變更，您需要先執行 git pull。
-    echo ---------------------------------------------------
+    echo ❌ Error: Push failed.
+    echo Tip: Try "git pull" first if there are remote changes.
 ) else (
     echo.
     echo ===================================================
-    echo 🎉 推送成功！
+    echo 🎉 Success! All changes pushed.
     echo ===================================================
 )
 
+:end
 pause
-:eof
