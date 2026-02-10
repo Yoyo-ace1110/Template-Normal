@@ -1,5 +1,5 @@
 @echo off
-chcp 65001 > nul
+chcp 936 > nul
 
 echo Copyright Notice
 echo © 2025 Yoyo-ace1110. All Rights Reserved.
